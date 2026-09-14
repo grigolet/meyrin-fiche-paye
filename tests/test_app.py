@@ -7,7 +7,10 @@ from app import app
 
 def test_home_and_health():
     client = app.test_client()
-    assert client.get("/").status_code == 200
+    home = client.get("/")
+    assert home.status_code == 200
+    assert "ENTRAÎNEURS ENREGISTRÉS".encode() in home.data
+    assert b"trainer-profile" in home.data
     assert client.get("/health").json == {"status": "ok"}
 
 
@@ -62,4 +65,3 @@ def test_invoice_total():
     assert response.status_code == 200
     text = PdfReader(BytesIO(response.data)).pages[0].extract_text()
     assert "545.00 CHF" in text
-

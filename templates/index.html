@@ -31,6 +31,24 @@
       <button class="tab" type="button" data-tab="invoice">Facture</button>
     </nav>
 
+    <section class="profiles" aria-labelledby="profiles-title">
+      <div class="profile-copy">
+        <p class="eyebrow" id="profiles-title">ENTRAÎNEURS ENREGISTRÉS</p>
+        <p>Les coordonnées restent uniquement dans ce navigateur.</p>
+      </div>
+      <label class="profile-picker">Profil
+        <select id="trainer-profile">
+          <option value="">Nouvel entraîneur</option>
+        </select>
+      </label>
+      <div class="profile-actions">
+        <button type="button" class="secondary compact" id="new-profile">Nouveau</button>
+        <button type="button" class="primary compact" id="save-profile">Enregistrer</button>
+        <button type="button" class="danger compact" id="delete-profile" disabled>Supprimer</button>
+      </div>
+      <p class="profile-status" id="profile-status" role="status" aria-live="polite"></p>
+    </section>
+
     <section id="salary" class="panel active">
       <form action="/salary-slip.pdf" method="post" target="_blank" data-calculator="salary">
         <div class="form-grid">
@@ -133,4 +151,3 @@
   <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>
-

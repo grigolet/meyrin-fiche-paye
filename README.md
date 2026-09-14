@@ -4,8 +4,9 @@ Petite application Flask pour créer deux PDF professionnels depuis un télépho
 
 - bulletins de paye, avec calcul du salaire brut, des retenues et du salaire net ;
 - factures d'entraîneur, avec lignes de prestations, TVA facultative et coordonnées de paiement.
+- profils d'entraîneurs réutilisables, enregistrés localement dans le navigateur pour préremplir les coordonnées.
 
-Les calculs du bulletin reprennent le fichier Excel de référence : rémunération horaire + rémunération journalière, puis retenues calculées sur le brut et arrondies individuellement au franc. L'application ne sauvegarde aucune donnée saisie.
+Les calculs du bulletin reprennent le fichier Excel de référence : rémunération horaire + rémunération journalière, puis retenues calculées sur le brut et arrondies individuellement au franc. Les profils sont sauvegardés uniquement dans le stockage local du navigateur utilisé. Ils ne sont ni envoyés au serveur ni ajoutés au dépôt Git.
 
 ## Lancer localement
 
