@@ -55,10 +55,12 @@ def dec(value: str | None, default: str = "0") -> Decimal:
 
 
 def display_date(value: str) -> str:
-    try:
-        return datetime.strptime(value, "%Y-%m-%d").strftime("%d.%m.%Y")
-    except ValueError:
-        return value
+    for date_format in ("%Y-%m-%d", "%d.%m.%Y"):
+        try:
+            return datetime.strptime(value, date_format).strftime("%d.%m.%Y")
+        except ValueError:
+            continue
+    return value
 
 
 def filename_part(value: str) -> str:
@@ -143,13 +145,18 @@ def salary_pdf(form) -> tuple[bytes, str]:
     days = dec(form.get("days"))
     daily_rate = dec(form.get("daily_rate"))
     other_amount = dec(form.get("other_amount"))
+    tax_exempt_amount = dec(form.get("tax_exempt_amount"))
     gross_lines = [
         ("Heures", hours, "heure", hourly_rate, hours * hourly_rate),
         ("Journées complètes", days, "jour", daily_rate, days * daily_rate),
     ]
     if other_amount or form.get("other_description", "").strip():
         gross_lines.append((form.get("other_description", "Autre rémunération").strip(), Decimal("1"), "forfait", other_amount, other_amount))
-    gross = sum((row[4] for row in gross_lines), Decimal("0"))
+    contribution_base = sum((row[4] for row in gross_lines), Decimal("0"))
+    if tax_exempt_amount or form.get("tax_exempt_description", "").strip():
+        tax_exempt_label = form.get("tax_exempt_description", "Rémunération exonérée").strip() or "Rémunération exonérée"
+        gross_lines.append((f"{tax_exempt_label} (exonéré)", Decimal("1"), "forfait", tax_exempt_amount, tax_exempt_amount))
+    gross = contribution_base + tax_exempt_amount
 
     deduction_specs = [
         ("AVS / AI / APG", dec(form.get("avs_rate"), "5.3")),
@@ -165,7 +172,7 @@ def salary_pdf(form) -> tuple[bytes, str]:
 
     deductions = []
     for label, rate in deduction_specs:
-        amount = (gross * rate / Decimal("100")).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+        amount = (contribution_base * rate / Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
         deductions.append((label, rate, amount))
     total_deductions = sum((row[2] for row in deductions), Decimal("0"))
     net = gross - total_deductions
@@ -234,7 +241,7 @@ def salary_pdf(form) -> tuple[bytes, str]:
 
     ded_data = [[p("Désignation", st["table_header"]), p("Base", st["table_header"]), p("Taux", st["table_header"]), p("Retenue", st["table_header"])]]
     for label, rate, amount in deductions:
-        ded_data.append([p(label, st["body"]), p(money(gross), st["right"]), p(f"{rate.normalize()} %", st["right"]), p(money(amount), st["right"])])
+        ded_data.append([p(label, st["body"]), p(money(contribution_base), st["right"]), p(f"{rate.normalize()} %", st["right"]), p(money(amount), st["right"])])
     ded_data.append([p("Total des cotisations", st["right_bold"]), "", "", p(money(total_deductions), st["right_bold"])])
     ded = Table(ded_data, colWidths=[76 * mm, 38 * mm, 28 * mm, 36 * mm], repeatRows=1)
     ded.setStyle(TableStyle([

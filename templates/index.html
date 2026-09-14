@@ -57,7 +57,7 @@
             <label class="wide">Nom complet<input name="trainer_name" placeholder="Prénom Nom" required></label>
             <label class="wide">Adresse<textarea name="trainer_address" rows="3" placeholder="Rue et numéro&#10;NPA Ville · Pays"></textarea></label>
             <label>N° AVS<input name="avs_number" placeholder="756.0000.0000.00"></label>
-            <label>Date de naissance<input type="date" name="birth_date"></label>
+            <label>Date de naissance<input type="text" inputmode="numeric" name="birth_date" placeholder="jj.mm.aaaa" pattern="(?:0[1-9]|[12][0-9]|3[01])\.(?:0[1-9]|1[0-2])\.[0-9]{4}" title="Utilisez le format jj.mm.aaaa"></label>
             <label class="wide">Fonction<input name="role" value="Moniteur de tennis de table"></label>
           </fieldset>
 
@@ -71,11 +71,14 @@
             <label>Tarif journalier (CHF)<input type="number" inputmode="decimal" name="daily_rate" step="0.01" min="0" value="120"></label>
             <label>Autre rémunération<input name="other_description" placeholder="Stage, déplacement…"></label>
             <label>Montant (CHF)<input type="number" inputmode="decimal" name="other_amount" step="0.01" value="0"></label>
+            <p class="field-note wide exempt-note">Rémunération exonérée: ajoutée au salaire brut et net, mais exclue de la base des cotisations et de l'impôt à la source.</p>
+            <label>Rémunération exonérée<input name="tax_exempt_description" placeholder="Remboursement de frais…"></label>
+            <label>Montant exonéré (CHF)<input type="number" inputmode="decimal" name="tax_exempt_amount" step="0.01" min="0" value="0"></label>
           </fieldset>
 
           <fieldset>
             <legend>Cotisations et retenues</legend>
-            <p class="field-note wide">Chaque retenue est arrondie au franc, comme dans le fichier Excel de référence.</p>
+            <p class="field-note wide">Chaque retenue est calculée sur la rémunération soumise aux cotisations et arrondie au centime.</p>
             <label>AVS / AI / APG (%)<input type="number" inputmode="decimal" name="avs_rate" step="0.001" min="0" value="5.3"></label>
             <label>Assurance chômage (%)<input type="number" inputmode="decimal" name="unemployment_rate" step="0.001" min="0" value="1.1"></label>
             <label>Assurance accident (%)<input type="number" inputmode="decimal" name="accident_rate" step="0.001" min="0" value="0"></label>

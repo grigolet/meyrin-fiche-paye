@@ -29,6 +29,7 @@ def test_salary_slip_matches_reference_calculation():
             "days": "2",
             "daily_rate": "120",
             "other_amount": "0",
+            "tax_exempt_amount": "0",
             "avs_rate": "5.3",
             "unemployment_rate": "1.1",
             "accident_rate": "0",
@@ -42,8 +43,42 @@ def test_salary_slip_matches_reference_calculation():
     text = "\n".join(page.extract_text() or "" for page in reader.pages)
     assert len(reader.pages) == 1
     assert "665.00 CHF" in text
-    assert "42.00 CHF" in text
-    assert "623.00 CHF" in text
+    assert "42.57 CHF" in text
+    assert "622.43 CHF" in text
+
+
+def test_salary_deductions_use_cents_and_exclude_exempt_pay():
+    client = app.test_client()
+    response = client.post(
+        "/salary-slip.pdf",
+        data={
+            "trainer_name": "Camille Exemple",
+            "birth_date": "12.04.1990",
+            "period_start": "2026-09-01",
+            "period_end": "2026-09-30",
+            "hours": "8.5",
+            "hourly_rate": "50",
+            "days": "0",
+            "daily_rate": "0",
+            "other_amount": "0",
+            "tax_exempt_description": "Remboursement de frais",
+            "tax_exempt_amount": "100",
+            "avs_rate": "5.3",
+            "unemployment_rate": "0",
+            "accident_rate": "0",
+            "lpp_rate": "0",
+            "withholding_rate": "0",
+            "extra_deduction_rate": "0",
+        },
+    )
+    assert response.status_code == 200
+    text = "\n".join(page.extract_text() or "" for page in PdfReader(BytesIO(response.data)).pages)
+    assert "Date de naissance: 12.04.1990" in text
+    assert "Remboursement de frais (exonéré)" in text
+    assert "425.00 CHF" in text
+    assert "22.53 CHF" in text
+    assert "525.00 CHF" in text
+    assert "502.47 CHF" in text
 
 
 def test_invoice_total():

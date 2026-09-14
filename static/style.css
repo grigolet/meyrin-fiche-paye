@@ -52,6 +52,7 @@ input, textarea { width: 100%; min-height: 43px; border: 1px solid #c8d1dd; bord
 textarea { resize: vertical; }
 input:focus, textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(21, 59, 103, .11); }
 .field-note { margin: -4px 0 3px; color: var(--muted); font-size: .78rem; font-weight: 500; }
+.field-note.exempt-note { margin-top: 3px; padding: 10px 11px; border-left: 3px solid var(--blue); background: var(--pale); border-radius: 0 7px 7px 0; }
 .summary { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); background: var(--pale); }
 .summary div { padding: 20px 27px; display: flex; flex-direction: column; border-right: 1px solid var(--line); }
 .summary div:last-child { border-right: 0; }

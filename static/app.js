@@ -3,7 +3,13 @@ const number = (value) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 const chf = (value) => `${value.toFixed(2)} CHF`;
+const roundCents = (value) => Math.round((value + 1e-9) * 100) / 100;
 const PROFILE_KEY = "meyrinCTT.trainerProfiles.v1";
+
+function displayBirthDate(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || "");
+  return match ? `${match[3]}.${match[2]}.${match[1]}` : (value || "");
+}
 
 const profileSelect = document.getElementById("trainer-profile");
 const profileStatus = document.getElementById("profile-status");
@@ -63,7 +69,7 @@ function applyProfile(profile) {
   salaryForm.trainer_name.value = profile.name || "";
   salaryForm.trainer_address.value = profile.address || "";
   salaryForm.avs_number.value = profile.avsNumber || "";
-  salaryForm.birth_date.value = profile.birthDate || "";
+  salaryForm.birth_date.value = displayBirthDate(profile.birthDate);
   salaryForm.role.value = profile.role || "Moniteur de tennis de table";
   invoiceForm.invoice_trainer_name.value = profile.name || "";
   invoiceForm.invoice_trainer_address.value = profile.address || "";
@@ -87,11 +93,12 @@ document.querySelectorAll(".tab").forEach((button) => {
 
 const salaryForm = document.querySelector('[data-calculator="salary"]');
 function updateSalary() {
-  const gross = number(salaryForm.hours.value) * number(salaryForm.hourly_rate.value)
+  const contributionBase = number(salaryForm.hours.value) * number(salaryForm.hourly_rate.value)
     + number(salaryForm.days.value) * number(salaryForm.daily_rate.value)
     + number(salaryForm.other_amount.value);
+  const gross = contributionBase + number(salaryForm.tax_exempt_amount.value);
   const rates = ["avs_rate", "unemployment_rate", "accident_rate", "lpp_rate", "withholding_rate", "extra_deduction_rate"];
-  const deductions = rates.reduce((total, name) => total + Math.round(gross * number(salaryForm[name].value) / 100), 0);
+  const deductions = rates.reduce((total, name) => total + roundCents(contributionBase * number(salaryForm[name].value) / 100), 0);
   salaryForm.querySelector('[data-total="gross"]').textContent = chf(gross);
   salaryForm.querySelector('[data-total="deductions"]').textContent = chf(deductions);
   salaryForm.querySelector('[data-total="net"]').textContent = chf(gross - deductions);
