@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Générateur privé de factures et bulletins de paye du Meyrin CTT">
+  <title>Documents entraîneurs · Meyrin CTT</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="{{ url_for('static', filename='meyrin-ctt-logo.png') }}" alt="Logo Meyrin CTT">
+      <div><strong>Meyrin CTT</strong><span>Documents entraîneurs</span></div>
+    </div>
+    <div class="privacy {{ 'protected' if protected else '' }}">{{ 'Accès protégé' if protected else 'Mode local sans mot de passe' }}</div>
+  </header>
+
+  <main class="workspace">
+    <section class="intro">
+      <div>
+        <p class="eyebrow">ADMINISTRATION DU CLUB</p>
+        <h1>Créer un document</h1>
+      </div>
+      <p>Saisissez les données, vérifiez le total, puis ouvrez ou téléchargez le PDF.</p>
+    </section>
+
+    <nav class="tabs" aria-label="Type de document">
+      <button class="tab active" type="button" data-tab="salary">Bulletin de paye</button>
+      <button class="tab" type="button" data-tab="invoice">Facture</button>
+    </nav>
+
+    <section id="salary" class="panel active">
+      <form action="/salary-slip.pdf" method="post" target="_blank" data-calculator="salary">
+        <div class="form-grid">
+          <fieldset>
+            <legend>Entraîneur</legend>
+            <label class="wide">Nom complet<input name="trainer_name" placeholder="Prénom Nom" required></label>
+            <label class="wide">Adresse<textarea name="trainer_address" rows="3" placeholder="Rue et numéro&#10;NPA Ville · Pays"></textarea></label>
+            <label>N° AVS<input name="avs_number" placeholder="756.0000.0000.00"></label>
+            <label>Date de naissance<input type="date" name="birth_date"></label>
+            <label class="wide">Fonction<input name="role" value="Moniteur de tennis de table"></label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Période et rémunération</legend>
+            <label>Début<input type="date" name="period_start" value="{{ month_start }}" required></label>
+            <label>Fin<input type="date" name="period_end" value="{{ month_end }}" required></label>
+            <label>Nombre d'heures<input type="number" inputmode="decimal" name="hours" step="0.01" min="0" value="8.5"></label>
+            <label>Tarif horaire (CHF)<input type="number" inputmode="decimal" name="hourly_rate" step="0.01" min="0" value="50"></label>
+            <label>Journées complètes<input type="number" inputmode="decimal" name="days" step="0.01" min="0" value="2"></label>
+            <label>Tarif journalier (CHF)<input type="number" inputmode="decimal" name="daily_rate" step="0.01" min="0" value="120"></label>
+            <label>Autre rémunération<input name="other_description" placeholder="Stage, déplacement…"></label>
+            <label>Montant (CHF)<input type="number" inputmode="decimal" name="other_amount" step="0.01" value="0"></label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Cotisations et retenues</legend>
+            <p class="field-note wide">Chaque retenue est arrondie au franc, comme dans le fichier Excel de référence.</p>
+            <label>AVS / AI / APG (%)<input type="number" inputmode="decimal" name="avs_rate" step="0.001" min="0" value="5.3"></label>
+            <label>Assurance chômage (%)<input type="number" inputmode="decimal" name="unemployment_rate" step="0.001" min="0" value="1.1"></label>
+            <label>Assurance accident (%)<input type="number" inputmode="decimal" name="accident_rate" step="0.001" min="0" value="0"></label>
+            <label>LPP (%)<input type="number" inputmode="decimal" name="lpp_rate" step="0.001" min="0" value="0"></label>
+            <label>Impôt à la source (%)<input type="number" inputmode="decimal" name="withholding_rate" step="0.001" min="0" value="0"></label>
+            <span></span>
+            <label>Autre retenue<input name="extra_deduction_label" placeholder="Libellé"></label>
+            <label>Taux (%)<input type="number" inputmode="decimal" name="extra_deduction_rate" step="0.001" min="0" value="0"></label>
+          </fieldset>
+        </div>
+
+        <aside class="summary" aria-live="polite">
+          <div><span>Salaire brut</span><strong data-total="gross">665.00 CHF</strong></div>
+          <div><span>Charges salariales</span><strong data-total="deductions">42.00 CHF</strong></div>
+          <div class="net"><span>Salaire net</span><strong data-total="net">623.00 CHF</strong></div>
+        </aside>
+        <div class="actions">
+          <button class="secondary" name="action" value="preview">Ouvrir le PDF</button>
+          <button class="primary" name="action" value="download">Télécharger</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="invoice" class="panel">
+      <form action="/invoice.pdf" method="post" target="_blank" data-calculator="invoice">
+        <div class="form-grid">
+          <fieldset>
+            <legend>Émetteur</legend>
+            <label class="wide">Nom complet<input name="invoice_trainer_name" placeholder="Prénom Nom" required></label>
+            <label class="wide">Adresse<textarea name="invoice_trainer_address" rows="3" placeholder="Rue et numéro&#10;NPA Ville · Pays"></textarea></label>
+            <label class="wide">IBAN<input name="iban" placeholder="CH00 0000 0000 0000 0000 0"></label>
+          </fieldset>
+          <fieldset>
+            <legend>Facture</legend>
+            <label>N° de facture<input name="invoice_number" value="{{ today.replace('-', '') }}-01"></label>
+            <label>Date d'émission<input type="date" name="issue_date" value="{{ today }}" required></label>
+            <label>Date d'échéance<input type="date" name="due_date" value="{{ due }}" required></label>
+            <label>TVA (%)<input type="number" inputmode="decimal" name="vat_rate" step="0.1" min="0" value="0"></label>
+            <label class="wide">Note de paiement<input name="payment_note" value="Merci pour votre confiance."></label>
+          </fieldset>
+          <fieldset>
+            <legend>Client</legend>
+            <label class="wide">Nom<input name="client_name" value="Meyrin CTT"></label>
+            <label class="wide">Adresse<textarea name="client_address" rows="3">Rue De-Livron 2
+1217 Meyrin</textarea></label>
+          </fieldset>
+        </div>
+
+        <div class="line-items">
+          <div class="line-head"><h2>Prestations</h2><button type="button" class="text-button" id="add-line">+ Ajouter une ligne</button></div>
+          <div id="invoice-lines">
+            <div class="invoice-line">
+              <label>Description<input name="item_description[]" value="Cours de tennis de table" required></label>
+              <label>Quantité<input type="number" inputmode="decimal" name="item_quantity[]" step="0.01" min="0" value="8.5"></label>
+              <label>Unité<input name="item_unit[]" value="heure"></label>
+              <label>Tarif (CHF)<input type="number" inputmode="decimal" name="item_rate[]" step="0.01" min="0" value="50"></label>
+              <button type="button" class="remove-line" aria-label="Supprimer cette ligne">×</button>
+            </div>
+          </div>
+        </div>
+        <aside class="summary invoice-summary" aria-live="polite">
+          <div><span>Sous-total</span><strong data-total="subtotal">425.00 CHF</strong></div>
+          <div><span>TVA</span><strong data-total="vat">0.00 CHF</strong></div>
+          <div class="net"><span>Total</span><strong data-total="invoice-total">425.00 CHF</strong></div>
+        </aside>
+        <div class="actions">
+          <button class="secondary" name="action" value="preview">Ouvrir le PDF</button>
+          <button class="primary" name="action" value="download">Télécharger</button>
+        </div>
+      </form>
+    </section>
+  </main>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
+
