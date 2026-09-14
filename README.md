@@ -41,6 +41,8 @@ railway up
 
 Le fichier `railway.json` configure le démarrage et la vérification de santé. Dans Railway, ajouter `APP_USERNAME` et `APP_PASSWORD` dans les variables du service avant de créer un domaine public.
 
+Si la commande `railway` n'est pas encore installée sous Windows, l'installer une fois avec `npm i -g @railway/cli`, puis relancer `railway up`.
+
 ## Vérifier
 
 ```powershell
