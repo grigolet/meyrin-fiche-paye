@@ -6,7 +6,7 @@ Petite application Flask pour créer deux PDF professionnels depuis un télépho
 - factures d'entraîneur, avec lignes de prestations, TVA facultative et coordonnées de paiement.
 - profils d'entraîneurs réutilisables, enregistrés localement dans le navigateur pour préremplir les coordonnées.
 
-Les calculs du bulletin reprennent le fichier Excel de référence. La rémunération peut être saisie avec un tarif horaire global ou détaillée en plusieurs activités (par exemple entraînement enfants, entraînement adultes et formations). Les cotisations et retenues peuvent être désactivées pour le bulletin entier. Les rémunérations exonérées facultatives restent hors de leur base de calcul, et chaque retenue active est arrondie individuellement au centime. Les profils sont sauvegardés uniquement dans le stockage local du navigateur utilisé. Ils ne sont ni envoyés au serveur ni ajoutés au dépôt Git.
+Les calculs du bulletin reprennent le fichier Excel de référence. La rémunération peut être saisie avec un tarif horaire global ou détaillée en plusieurs activités (par exemple entraînement enfants, entraînement adultes et formations). Chaque ligne horaire peut être incluse dans les charges ou exclue individuellement, et les cotisations et retenues peuvent aussi être désactivées pour le bulletin entier. Les rémunérations exonérées facultatives restent hors de leur base de calcul, et chaque retenue active est arrondie individuellement au centime. Les profils sont sauvegardés uniquement dans le stockage local du navigateur utilisé. Ils ne sont ni envoyés au serveur ni ajoutés au dépôt Git.
 
 ## Lancer localement
 

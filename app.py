@@ -150,26 +150,37 @@ def salary_pdf(form) -> tuple[bytes, str]:
 
     remuneration_mode = form.get("remuneration_mode", "global")
     gross_lines = []
+    contribution_base = Decimal("0")
     if remuneration_mode == "detailed":
         descriptions = form.getlist("activity_description[]")
         quantities = form.getlist("activity_hours[]")
         rates = form.getlist("activity_rate[]")
-        for description, quantity, rate in zip(descriptions, quantities, rates):
+        charge_flags = form.getlist("activity_subject_to_charges[]")
+        for index, (description, quantity, rate) in enumerate(zip(descriptions, quantities, rates)):
             hours = dec(quantity)
             hourly_rate = dec(rate)
             if description.strip() or hours or hourly_rate:
-                gross_lines.append((description.strip() or "Activité", hours, "heure", hourly_rate, hours * hourly_rate))
+                amount = hours * hourly_rate
+                subject_to_charges = index >= len(charge_flags) or charge_flags[index].lower() not in {"0", "false", "off", "no"}
+                label = description.strip() or "Activité"
+                gross_lines.append((label if subject_to_charges else f"{label} (sans charges)", hours, "heure", hourly_rate, amount))
+                if subject_to_charges:
+                    contribution_base += amount
     else:
         hours = dec(form.get("hours"))
         hourly_rate = dec(form.get("hourly_rate"))
-        gross_lines.append((form.get("global_description", "Heures d'entraînement").strip() or "Heures d'entraînement", hours, "heure", hourly_rate, hours * hourly_rate))
+        amount = hours * hourly_rate
+        subject_to_charges = checkbox_enabled(form, "global_subject_to_charges")
+        label = form.get("global_description", "Heures d'entraînement").strip() or "Heures d'entraînement"
+        gross_lines.append((label if subject_to_charges else f"{label} (sans charges)", hours, "heure", hourly_rate, amount))
+        if subject_to_charges:
+            contribution_base += amount
 
     tax_exempt_amount = dec(form.get("tax_exempt_amount"))
-    contribution_base = sum((row[4] for row in gross_lines), Decimal("0"))
+    gross = sum((row[4] for row in gross_lines), Decimal("0")) + tax_exempt_amount
     if tax_exempt_amount or form.get("tax_exempt_description", "").strip():
         tax_exempt_label = form.get("tax_exempt_description", "Rémunération exonérée").strip() or "Rémunération exonérée"
         gross_lines.append((f"{tax_exempt_label} (exonéré)", Decimal("1"), "forfait", tax_exempt_amount, tax_exempt_amount))
-    gross = contribution_base + tax_exempt_amount
 
     deduction_specs = [
         ("AVS / AI / APG", dec(form.get("avs_rate"), "5.3")),

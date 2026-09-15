@@ -62,7 +62,10 @@ input:focus, textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px r
 .remuneration-panel[hidden] { display: none; }
 .remuneration-panel .line-head { margin: 3px 0 0; }
 .remuneration-panel .line-head h2 { font-size: .85rem; }
-.salary-line { display: grid; grid-template-columns: minmax(150px, 2fr) 82px 105px 36px; gap: 8px; align-items: end; margin-top: 9px; }
+.salary-line { display: grid; grid-template-columns: minmax(145px, 2fr) 76px 98px 118px 36px; gap: 8px; align-items: end; margin-top: 9px; }
+.charge-toggle { display: flex; flex-direction: row; align-items: center; gap: 7px; min-height: 43px; padding: 8px 9px; border: 1px solid #c8d1dd; border-radius: 8px; background: #fff; cursor: pointer; }
+.charge-toggle input { width: auto; min-height: 0; padding: 0; }
+.charge-toggle span { font-size: .75rem; }
 .toggle-row { display: flex; grid-template-columns: none; flex-direction: row; align-items: center; gap: 10px; min-height: 43px; padding: 10px 12px; border: 1px solid #c8d1dd; border-radius: 8px; background: var(--pale); cursor: pointer; }
 .toggle-row span { font-size: .84rem; }
 .summary { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); background: var(--pale); }

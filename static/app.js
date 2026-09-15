@@ -112,11 +112,15 @@ function updateSalary() {
   let contributionBase = 0;
   if (selectedRemunerationMode() === "detailed") {
     salaryLines.querySelectorAll(".salary-line").forEach((line) => {
-      contributionBase += number(line.querySelector('[name="activity_hours[]"]').value)
-        * number(line.querySelector('[name="activity_rate[]"]').value);
+      if (line.querySelector(".charge-toggle-input").checked) {
+        contributionBase += number(line.querySelector('[name="activity_hours[]"]').value)
+          * number(line.querySelector('[name="activity_rate[]"]').value);
+      }
     });
   } else {
-    contributionBase = number(salaryForm.hours.value) * number(salaryForm.hourly_rate.value);
+    contributionBase = salaryForm.querySelector('[data-remuneration-panel="global"] .charge-toggle-input').checked
+      ? number(salaryForm.hours.value) * number(salaryForm.hourly_rate.value)
+      : 0;
   }
   const gross = contributionBase + number(salaryForm.tax_exempt_amount.value);
   const rates = ["avs_rate", "unemployment_rate", "accident_rate", "lpp_rate", "withholding_rate", "extra_deduction_rate"];
@@ -129,13 +133,24 @@ function updateSalary() {
   salaryForm.querySelector('[data-total="net"]').textContent = chf(gross - deductions);
 }
 salaryForm.addEventListener("input", updateSalary);
+salaryForm.addEventListener("change", (event) => {
+  if (!event.target.classList.contains("charge-toggle-input")) return;
+  event.target.parentElement.querySelector('input[type="hidden"]').value = event.target.checked ? "1" : "0";
+  updateSalary();
+});
 salaryForm.querySelectorAll('[name="remuneration_mode"]').forEach((radio) => radio.addEventListener("change", setRemunerationMode));
 
 document.getElementById("add-salary-line").addEventListener("click", () => {
   const clone = salaryLines.querySelector(".salary-line").cloneNode(true);
   clone.querySelectorAll("input").forEach((input) => {
     input.disabled = false;
-    input.value = input.name === "activity_hours[]" ? "1" : "";
+    if (input.classList.contains("charge-toggle-input")) {
+      input.checked = true;
+    } else if (input.name === "activity_subject_to_charges[]") {
+      input.value = "1";
+    } else {
+      input.value = input.name === "activity_hours[]" ? "1" : "";
+    }
   });
   salaryLines.appendChild(clone);
   updateSalary();

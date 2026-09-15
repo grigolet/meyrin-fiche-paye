@@ -73,6 +73,7 @@
               <label class="wide">Description<input name="global_description" value="Heures d'entraînement"></label>
               <label>Nombre d'heures<input type="number" inputmode="decimal" name="hours" step="0.01" min="0" value="8.5"></label>
               <label>Tarif horaire (CHF)<input type="number" inputmode="decimal" name="hourly_rate" step="0.01" min="0" value="50"></label>
+              <label class="charge-toggle wide"><input type="checkbox" class="charge-toggle-input" checked><input type="hidden" name="global_subject_to_charges" value="1"><span>Soumis aux charges</span></label>
             </div>
             <div class="remuneration-panel wide" data-remuneration-panel="detailed" hidden>
               <div class="line-head"><h2>Activités</h2><button type="button" class="text-button" id="add-salary-line">+ Ajouter</button></div>
@@ -81,6 +82,7 @@
                   <label>Description<input name="activity_description[]" value="Entraînement enfants" disabled></label>
                   <label>Heures<input type="number" inputmode="decimal" name="activity_hours[]" step="0.01" min="0" value="1" disabled></label>
                   <label>Tarif (CHF)<input type="number" inputmode="decimal" name="activity_rate[]" step="0.01" min="0" value="50" disabled></label>
+                  <label class="charge-toggle"><input type="checkbox" class="charge-toggle-input" checked disabled><input type="hidden" name="activity_subject_to_charges[]" value="1" disabled><span>Soumis aux charges</span></label>
                   <button type="button" class="remove-line" aria-label="Supprimer cette activité">×</button>
                 </div>
               </div>

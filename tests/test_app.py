@@ -28,6 +28,7 @@ def test_salary_slip_matches_reference_calculation():
             "global_description": "Entraînement",
             "hours": "13.3",
             "hourly_rate": "50",
+            "global_subject_to_charges": "1",
             "tax_exempt_amount": "0",
             "deductions_enabled": "1",
             "avs_rate": "5.3",
@@ -59,6 +60,7 @@ def test_salary_deductions_use_cents_and_exclude_exempt_pay():
             "remuneration_mode": "global",
             "hours": "8.5",
             "hourly_rate": "50",
+            "global_subject_to_charges": "1",
             "tax_exempt_description": "Remboursement de frais",
             "tax_exempt_amount": "100",
             "deductions_enabled": "1",
@@ -92,6 +94,7 @@ def test_salary_detailed_activities_and_disabled_deductions():
             "activity_description[]": ["Entraînement enfants", "Formation adultes"],
             "activity_hours[]": ["4.5", "3"],
             "activity_rate[]": ["50", "60"],
+            "activity_subject_to_charges[]": ["1", "1"],
             "tax_exempt_amount": "0",
             "deductions_enabled": "0",
             "avs_rate": "5.3",
@@ -105,6 +108,34 @@ def test_salary_detailed_activities_and_disabled_deductions():
     assert "Formation adultes" in text
     assert "405.00 CHF" in text
     assert "0.00 CHF" in text
+
+
+def test_salary_can_mix_hourly_work_with_and_without_charges():
+    client = app.test_client()
+    response = client.post(
+        "/salary-slip.pdf",
+        data={
+            "trainer_name": "Camille Exemple",
+            "period_start": "01.09.2026",
+            "period_end": "30.09.2026",
+            "remuneration_mode": "detailed",
+            "activity_description[]": ["Entraînement enfants", "Formation"],
+            "activity_hours[]": ["5", "2"],
+            "activity_rate[]": ["50", "75"],
+            "activity_subject_to_charges[]": ["1", "0"],
+            "deductions_enabled": "1",
+            "avs_rate": "5.3",
+            "unemployment_rate": "0",
+            "tax_exempt_amount": "0",
+        },
+    )
+    assert response.status_code == 200
+    text = "\n".join(page.extract_text() or "" for page in PdfReader(BytesIO(response.data)).pages)
+    assert "Formation (sans charges)" in text
+    assert "400.00 CHF" in text
+    assert "250.00 CHF" in text
+    assert "13.25 CHF" in text
+    assert "386.75 CHF" in text
 
 
 def test_invoice_total():
