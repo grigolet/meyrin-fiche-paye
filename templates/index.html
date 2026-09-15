@@ -63,14 +63,28 @@
 
           <fieldset>
             <legend>Période et rémunération</legend>
-            <label>Début<input type="date" name="period_start" value="{{ month_start }}" required></label>
-            <label>Fin<input type="date" name="period_end" value="{{ month_end }}" required></label>
-            <label>Nombre d'heures<input type="number" inputmode="decimal" name="hours" step="0.01" min="0" value="8.5"></label>
-            <label>Tarif horaire (CHF)<input type="number" inputmode="decimal" name="hourly_rate" step="0.01" min="0" value="50"></label>
-            <label>Journées complètes<input type="number" inputmode="decimal" name="days" step="0.01" min="0" value="2"></label>
-            <label>Tarif journalier (CHF)<input type="number" inputmode="decimal" name="daily_rate" step="0.01" min="0" value="120"></label>
-            <label>Autre rémunération<input name="other_description" placeholder="Stage, déplacement…"></label>
-            <label>Montant (CHF)<input type="number" inputmode="decimal" name="other_amount" step="0.01" value="0"></label>
+            <label>Début<input type="text" inputmode="numeric" name="period_start" value="{{ month_start_ch }}" placeholder="jj.mm.aaaa" pattern="(?:0[1-9]|[12][0-9]|3[01])\.(?:0[1-9]|1[0-2])\.[0-9]{4}" title="Utilisez le format jj.mm.aaaa" required></label>
+            <label>Fin<input type="text" inputmode="numeric" name="period_end" value="{{ month_end_ch }}" placeholder="jj.mm.aaaa" pattern="(?:0[1-9]|[12][0-9]|3[01])\.(?:0[1-9]|1[0-2])\.[0-9]{4}" title="Utilisez le format jj.mm.aaaa" required></label>
+            <div class="mode-switch wide" role="group" aria-label="Mode de rémunération">
+              <label><input type="radio" name="remuneration_mode" value="global" checked> Tarif global</label>
+              <label><input type="radio" name="remuneration_mode" value="detailed"> Activités détaillées</label>
+            </div>
+            <div class="remuneration-panel wide" data-remuneration-panel="global">
+              <label class="wide">Description<input name="global_description" value="Heures d'entraînement"></label>
+              <label>Nombre d'heures<input type="number" inputmode="decimal" name="hours" step="0.01" min="0" value="8.5"></label>
+              <label>Tarif horaire (CHF)<input type="number" inputmode="decimal" name="hourly_rate" step="0.01" min="0" value="50"></label>
+            </div>
+            <div class="remuneration-panel wide" data-remuneration-panel="detailed" hidden>
+              <div class="line-head"><h2>Activités</h2><button type="button" class="text-button" id="add-salary-line">+ Ajouter</button></div>
+              <div id="salary-lines">
+                <div class="salary-line">
+                  <label>Description<input name="activity_description[]" value="Entraînement enfants" disabled></label>
+                  <label>Heures<input type="number" inputmode="decimal" name="activity_hours[]" step="0.01" min="0" value="1" disabled></label>
+                  <label>Tarif (CHF)<input type="number" inputmode="decimal" name="activity_rate[]" step="0.01" min="0" value="50" disabled></label>
+                  <button type="button" class="remove-line" aria-label="Supprimer cette activité">×</button>
+                </div>
+              </div>
+            </div>
             <p class="field-note wide exempt-note">Rémunération exonérée: ajoutée au salaire brut et net, mais exclue de la base des cotisations et de l'impôt à la source.</p>
             <label>Rémunération exonérée<input name="tax_exempt_description" placeholder="Remboursement de frais…"></label>
             <label>Montant exonéré (CHF)<input type="number" inputmode="decimal" name="tax_exempt_amount" step="0.01" min="0" value="0"></label>
@@ -78,6 +92,7 @@
 
           <fieldset>
             <legend>Cotisations et retenues</legend>
+            <label class="toggle-row wide"><input type="hidden" name="deductions_enabled" value="0"><input type="checkbox" name="deductions_enabled" value="1" checked><span>Appliquer les cotisations et retenues</span></label>
             <p class="field-note wide">Chaque retenue est calculée sur la rémunération soumise aux cotisations et arrondie au centime.</p>
             <label>AVS / AI / APG (%)<input type="number" inputmode="decimal" name="avs_rate" step="0.001" min="0" value="5.3"></label>
             <label>Assurance chômage (%)<input type="number" inputmode="decimal" name="unemployment_rate" step="0.001" min="0" value="1.1"></label>

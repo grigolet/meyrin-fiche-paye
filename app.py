@@ -63,6 +63,14 @@ def display_date(value: str) -> str:
     return value
 
 
+def checkbox_enabled(form, name: str, default: bool = True) -> bool:
+    values = form.getlist(name) if hasattr(form, "getlist") else [form.get(name)]
+    values = [str(value).lower() for value in values if value is not None]
+    if not values:
+        return default
+    return values[-1] not in {"0", "false", "off", "no"}
+
+
 def filename_part(value: str) -> str:
     cleaned = re.sub(r"[^A-Za-z0-9_-]+", "-", value.strip()).strip("-")
     return cleaned or "document"
@@ -140,18 +148,23 @@ def salary_pdf(form) -> tuple[bytes, str]:
     if not trainer:
         raise ValueError("Le nom de l'entraîneur est obligatoire.")
 
-    hours = dec(form.get("hours"))
-    hourly_rate = dec(form.get("hourly_rate"))
-    days = dec(form.get("days"))
-    daily_rate = dec(form.get("daily_rate"))
-    other_amount = dec(form.get("other_amount"))
+    remuneration_mode = form.get("remuneration_mode", "global")
+    gross_lines = []
+    if remuneration_mode == "detailed":
+        descriptions = form.getlist("activity_description[]")
+        quantities = form.getlist("activity_hours[]")
+        rates = form.getlist("activity_rate[]")
+        for description, quantity, rate in zip(descriptions, quantities, rates):
+            hours = dec(quantity)
+            hourly_rate = dec(rate)
+            if description.strip() or hours or hourly_rate:
+                gross_lines.append((description.strip() or "Activité", hours, "heure", hourly_rate, hours * hourly_rate))
+    else:
+        hours = dec(form.get("hours"))
+        hourly_rate = dec(form.get("hourly_rate"))
+        gross_lines.append((form.get("global_description", "Heures d'entraînement").strip() or "Heures d'entraînement", hours, "heure", hourly_rate, hours * hourly_rate))
+
     tax_exempt_amount = dec(form.get("tax_exempt_amount"))
-    gross_lines = [
-        ("Heures", hours, "heure", hourly_rate, hours * hourly_rate),
-        ("Journées complètes", days, "jour", daily_rate, days * daily_rate),
-    ]
-    if other_amount or form.get("other_description", "").strip():
-        gross_lines.append((form.get("other_description", "Autre rémunération").strip(), Decimal("1"), "forfait", other_amount, other_amount))
     contribution_base = sum((row[4] for row in gross_lines), Decimal("0"))
     if tax_exempt_amount or form.get("tax_exempt_description", "").strip():
         tax_exempt_label = form.get("tax_exempt_description", "Rémunération exonérée").strip() or "Rémunération exonérée"
@@ -170,9 +183,10 @@ def salary_pdf(form) -> tuple[bytes, str]:
     if extra_label or extra_rate:
         deduction_specs.append((extra_label or "Autre retenue", extra_rate))
 
+    deductions_enabled = checkbox_enabled(form, "deductions_enabled")
     deductions = []
     for label, rate in deduction_specs:
-        amount = (contribution_base * rate / Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        amount = (contribution_base * rate / Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) if deductions_enabled else Decimal("0")
         deductions.append((label, rate, amount))
     total_deductions = sum((row[2] for row in deductions), Decimal("0"))
     net = gross - total_deductions
@@ -412,6 +426,8 @@ def create_app() -> Flask:
             due=(today + timedelta(days=30)).isoformat(),
             month_start=month_start.isoformat(),
             month_end=month_end.isoformat(),
+            month_start_ch=month_start.strftime("%d.%m.%Y"),
+            month_end_ch=month_end.strftime("%d.%m.%Y"),
             protected=bool(os.environ.get("APP_PASSWORD")),
         )
 

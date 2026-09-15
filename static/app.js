@@ -92,18 +92,65 @@ document.querySelectorAll(".tab").forEach((button) => {
 });
 
 const salaryForm = document.querySelector('[data-calculator="salary"]');
+const salaryLines = document.getElementById("salary-lines");
+
+function selectedRemunerationMode() {
+  return salaryForm.querySelector('[name="remuneration_mode"]:checked').value;
+}
+
+function setRemunerationMode() {
+  const mode = selectedRemunerationMode();
+  salaryForm.querySelectorAll("[data-remuneration-panel]").forEach((panel) => {
+    const active = panel.dataset.remunerationPanel === mode;
+    panel.hidden = !active;
+    panel.querySelectorAll("input").forEach((input) => input.disabled = !active);
+  });
+  updateSalary();
+}
+
 function updateSalary() {
-  const contributionBase = number(salaryForm.hours.value) * number(salaryForm.hourly_rate.value)
-    + number(salaryForm.days.value) * number(salaryForm.daily_rate.value)
-    + number(salaryForm.other_amount.value);
+  let contributionBase = 0;
+  if (selectedRemunerationMode() === "detailed") {
+    salaryLines.querySelectorAll(".salary-line").forEach((line) => {
+      contributionBase += number(line.querySelector('[name="activity_hours[]"]').value)
+        * number(line.querySelector('[name="activity_rate[]"]').value);
+    });
+  } else {
+    contributionBase = number(salaryForm.hours.value) * number(salaryForm.hourly_rate.value);
+  }
   const gross = contributionBase + number(salaryForm.tax_exempt_amount.value);
   const rates = ["avs_rate", "unemployment_rate", "accident_rate", "lpp_rate", "withholding_rate", "extra_deduction_rate"];
-  const deductions = rates.reduce((total, name) => total + roundCents(contributionBase * number(salaryForm[name].value) / 100), 0);
+  const deductionsEnabled = salaryForm.querySelector('[name="deductions_enabled"][type="checkbox"]').checked;
+  const deductions = deductionsEnabled
+    ? rates.reduce((total, name) => total + roundCents(contributionBase * number(salaryForm[name].value) / 100), 0)
+    : 0;
   salaryForm.querySelector('[data-total="gross"]').textContent = chf(gross);
   salaryForm.querySelector('[data-total="deductions"]').textContent = chf(deductions);
   salaryForm.querySelector('[data-total="net"]').textContent = chf(gross - deductions);
 }
 salaryForm.addEventListener("input", updateSalary);
+salaryForm.querySelectorAll('[name="remuneration_mode"]').forEach((radio) => radio.addEventListener("change", setRemunerationMode));
+
+document.getElementById("add-salary-line").addEventListener("click", () => {
+  const clone = salaryLines.querySelector(".salary-line").cloneNode(true);
+  clone.querySelectorAll("input").forEach((input) => {
+    input.disabled = false;
+    input.value = input.name === "activity_hours[]" ? "1" : "";
+  });
+  salaryLines.appendChild(clone);
+  updateSalary();
+});
+
+salaryLines.addEventListener("click", (event) => {
+  if (!event.target.classList.contains("remove-line")) return;
+  const lines = salaryLines.querySelectorAll(".salary-line");
+  if (lines.length === 1) {
+    lines[0].querySelectorAll("input").forEach((input) => input.value = "");
+  } else {
+    event.target.closest(".salary-line").remove();
+  }
+  updateSalary();
+});
 
 const invoiceForm = document.querySelector('[data-calculator="invoice"]');
 function updateInvoice() {
@@ -184,6 +231,6 @@ document.getElementById("invoice-lines").addEventListener("click", (event) => {
   updateInvoice();
 });
 
-updateSalary();
+setRemunerationMode();
 updateInvoice();
 renderProfiles();

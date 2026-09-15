@@ -24,12 +24,12 @@ def test_salary_slip_matches_reference_calculation():
             "role": "Moniteur de tennis de table",
             "period_start": "2026-05-01",
             "period_end": "2026-05-31",
-            "hours": "8.5",
+            "remuneration_mode": "global",
+            "global_description": "Entraînement",
+            "hours": "13.3",
             "hourly_rate": "50",
-            "days": "2",
-            "daily_rate": "120",
-            "other_amount": "0",
             "tax_exempt_amount": "0",
+            "deductions_enabled": "1",
             "avs_rate": "5.3",
             "unemployment_rate": "1.1",
             "accident_rate": "0",
@@ -56,13 +56,12 @@ def test_salary_deductions_use_cents_and_exclude_exempt_pay():
             "birth_date": "12.04.1990",
             "period_start": "2026-09-01",
             "period_end": "2026-09-30",
+            "remuneration_mode": "global",
             "hours": "8.5",
             "hourly_rate": "50",
-            "days": "0",
-            "daily_rate": "0",
-            "other_amount": "0",
             "tax_exempt_description": "Remboursement de frais",
             "tax_exempt_amount": "100",
+            "deductions_enabled": "1",
             "avs_rate": "5.3",
             "unemployment_rate": "0",
             "accident_rate": "0",
@@ -79,6 +78,33 @@ def test_salary_deductions_use_cents_and_exclude_exempt_pay():
     assert "22.53 CHF" in text
     assert "525.00 CHF" in text
     assert "502.47 CHF" in text
+
+
+def test_salary_detailed_activities_and_disabled_deductions():
+    client = app.test_client()
+    response = client.post(
+        "/salary-slip.pdf",
+        data={
+            "trainer_name": "Camille Exemple",
+            "period_start": "01.09.2026",
+            "period_end": "30.09.2026",
+            "remuneration_mode": "detailed",
+            "activity_description[]": ["Entraînement enfants", "Formation adultes"],
+            "activity_hours[]": ["4.5", "3"],
+            "activity_rate[]": ["50", "60"],
+            "tax_exempt_amount": "0",
+            "deductions_enabled": "0",
+            "avs_rate": "5.3",
+            "unemployment_rate": "1.1",
+        },
+    )
+    assert response.status_code == 200
+    text = "\n".join(page.extract_text() or "" for page in PdfReader(BytesIO(response.data)).pages)
+    assert "Période du 01.09.2026 au 30.09.2026" in text
+    assert "Entraînement enfants" in text
+    assert "Formation adultes" in text
+    assert "405.00 CHF" in text
+    assert "0.00 CHF" in text
 
 
 def test_invoice_total():
