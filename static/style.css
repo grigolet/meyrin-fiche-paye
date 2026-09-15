@@ -60,9 +60,11 @@ input:focus, textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px r
 .mode-switch input, .toggle-row input { width: auto; min-height: 0; padding: 0; }
 .remuneration-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 .remuneration-panel[hidden] { display: none; }
+.remuneration-panel .line-head, #salary-lines { grid-column: 1 / -1; min-width: 0; }
 .remuneration-panel .line-head { margin: 3px 0 0; }
 .remuneration-panel .line-head h2 { font-size: .85rem; }
-.salary-line { display: grid; grid-template-columns: minmax(145px, 2fr) 76px 98px 118px 36px; gap: 8px; align-items: end; margin-top: 9px; }
+.salary-line { display: grid; grid-template-columns: minmax(0, 1fr) minmax(88px, .7fr); gap: 10px; align-items: end; margin-top: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 9px; background: #fbfcfe; }
+.salary-line label:first-child { grid-column: 1 / -1; }
 .charge-toggle { display: flex; flex-direction: row; align-items: center; gap: 7px; min-height: 43px; padding: 8px 9px; border: 1px solid #c8d1dd; border-radius: 8px; background: #fff; cursor: pointer; }
 .charge-toggle input { width: auto; min-height: 0; padding: 0; }
 .charge-toggle span { font-size: .75rem; }
@@ -96,8 +98,7 @@ button.secondary { background: #fff; border: 1px solid #b8c4d2; color: var(--blu
   .intro { display: block; }
   .intro > p { margin-top: 10px; }
   .invoice-line { grid-template-columns: 2fr 1fr; padding: 14px; border: 1px solid var(--line); border-radius: 10px; }
-  .salary-line { grid-template-columns: 2fr 1fr; padding: 12px; border: 1px solid var(--line); border-radius: 9px; }
-  .salary-line label:first-child { grid-column: 1 / -1; }
+  .salary-line { grid-template-columns: 2fr 1fr; }
   .invoice-line label:first-child { grid-column: 1 / -1; }
   .remove-line { grid-column: 2; justify-self: end; width: 42px; }
 }
