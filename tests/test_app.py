@@ -9,8 +9,9 @@ def test_home_and_health():
     client = app.test_client()
     home = client.get("/")
     assert home.status_code == 200
-    assert "ENTRAÎNEURS ENREGISTRÉS".encode() in home.data
+    assert "PERSONNEL ENREGISTRÉ".encode() in home.data
     assert b"trainer-profile" in home.data
+    assert "Documents du personnel".encode() in home.data
     assert client.get("/health").json == {"status": "ok"}
 
 
@@ -46,6 +47,7 @@ def test_salary_slip_matches_reference_calculation():
     assert "665.00 CHF" in text
     assert "42.57 CHF" in text
     assert "622.43 CHF" in text
+    assert "COLLABORATEUR/TRICE" in text
 
 
 def test_salary_deductions_use_cents_and_exclude_exempt_pay():

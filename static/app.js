@@ -38,7 +38,7 @@ function storeProfiles(profiles) {
 let profiles = loadProfiles();
 
 function renderProfiles(selectedId = "") {
-  profileSelect.replaceChildren(new Option("Nouvel entraîneur", ""));
+  profileSelect.replaceChildren(new Option("Nouveau profil", ""));
   [...profiles]
     .sort((a, b) => a.name.localeCompare(b.name, "fr"))
     .forEach((profile) => profileSelect.add(new Option(profile.name, profile.id)));
@@ -70,14 +70,14 @@ function applyProfile(profile) {
   salaryForm.trainer_address.value = profile.address || "";
   salaryForm.avs_number.value = profile.avsNumber || "";
   salaryForm.birth_date.value = displayBirthDate(profile.birthDate);
-  salaryForm.role.value = profile.role || "Moniteur de tennis de table";
+  salaryForm.role.value = profile.role || "";
   invoiceForm.invoice_trainer_name.value = profile.name || "";
   invoiceForm.invoice_trainer_address.value = profile.address || "";
   invoiceForm.iban.value = profile.iban || "";
 }
 
 function clearProfileFields() {
-  applyProfile({ role: "Moniteur de tennis de table" });
+  applyProfile({ role: "" });
   profileSelect.value = "";
   deleteProfileButton.disabled = true;
   profileStatus.textContent = "Nouveau profil prêt à être saisi.";
@@ -197,7 +197,7 @@ document.getElementById("save-profile").addEventListener("click", () => {
   const selected = profiles.find((item) => item.id === profileSelect.value);
   const profile = currentProfile(selected || {});
   if (!profile.name) {
-    profileStatus.textContent = "Saisissez le nom de l'entraîneur avant d'enregistrer.";
+    profileStatus.textContent = "Saisissez le nom de la personne avant d'enregistrer.";
     const nameField = activeDocumentType() === "invoice" ? invoiceForm.invoice_trainer_name : salaryForm.trainer_name;
     nameField.focus();
     return;

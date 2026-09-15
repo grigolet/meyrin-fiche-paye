@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Générateur privé de factures et bulletins de paye du Meyrin CTT">
-  <title>Documents entraîneurs · Meyrin CTT</title>
+  <title>Documents du personnel · Meyrin CTT</title>
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
@@ -12,7 +12,7 @@
   <header class="topbar">
     <div class="brand">
       <img src="{{ url_for('static', filename='meyrin-ctt-logo.png') }}" alt="Logo Meyrin CTT">
-      <div><strong>Meyrin CTT</strong><span>Documents entraîneurs</span></div>
+      <div><strong>Meyrin CTT</strong><span>Documents du personnel</span></div>
     </div>
     <div class="privacy {{ 'protected' if protected else '' }}">{{ 'Accès protégé' if protected else 'Mode local sans mot de passe' }}</div>
   </header>
@@ -33,12 +33,12 @@
 
     <section class="profiles" aria-labelledby="profiles-title">
       <div class="profile-copy">
-        <p class="eyebrow" id="profiles-title">ENTRAÎNEURS ENREGISTRÉS</p>
+        <p class="eyebrow" id="profiles-title">PERSONNEL ENREGISTRÉ</p>
         <p>Les coordonnées restent uniquement dans ce navigateur.</p>
       </div>
       <label class="profile-picker">Profil
         <select id="trainer-profile">
-          <option value="">Nouvel entraîneur</option>
+          <option value="">Nouveau profil</option>
         </select>
       </label>
       <div class="profile-actions">
@@ -53,12 +53,12 @@
       <form action="/salary-slip.pdf" method="post" target="_blank" data-calculator="salary">
         <div class="form-grid">
           <fieldset>
-            <legend>Entraîneur</legend>
+            <legend>Collaborateur/trice</legend>
             <label class="wide">Nom complet<input name="trainer_name" placeholder="Prénom Nom" required></label>
             <label class="wide">Adresse<textarea name="trainer_address" rows="3" placeholder="Rue et numéro&#10;NPA Ville · Pays"></textarea></label>
             <label>N° AVS<input name="avs_number" placeholder="756.0000.0000.00"></label>
             <label>Date de naissance<input type="text" inputmode="numeric" name="birth_date" placeholder="jj.mm.aaaa" pattern="(?:0[1-9]|[12][0-9]|3[01])\.(?:0[1-9]|1[0-2])\.[0-9]{4}" title="Utilisez le format jj.mm.aaaa"></label>
-            <label class="wide">Fonction<input name="role" value="Moniteur de tennis de table"></label>
+            <label class="wide">Fonction<input name="role" placeholder="Entraîneur, agent de nettoyage…"></label>
           </fieldset>
 
           <fieldset>
@@ -70,7 +70,7 @@
               <label><input type="radio" name="remuneration_mode" value="detailed"> Activités détaillées</label>
             </div>
             <div class="remuneration-panel wide" data-remuneration-panel="global">
-              <label class="wide">Description<input name="global_description" value="Heures d'entraînement"></label>
+              <label class="wide">Description<input name="global_description" value="Heures de travail"></label>
               <label>Nombre d'heures<input type="number" inputmode="decimal" name="hours" step="0.01" min="0" value="8.5"></label>
               <label>Tarif horaire (CHF)<input type="number" inputmode="decimal" name="hourly_rate" step="0.01" min="0" value="50"></label>
               <label class="charge-toggle wide"><input type="checkbox" class="charge-toggle-input" checked><input type="hidden" name="global_subject_to_charges" value="1"><span>Soumis aux charges</span></label>
@@ -79,7 +79,7 @@
               <div class="line-head"><h2>Activités</h2><button type="button" class="text-button" id="add-salary-line">+ Ajouter</button></div>
               <div id="salary-lines">
                 <div class="salary-line">
-                  <label>Description<input name="activity_description[]" value="Entraînement enfants" disabled></label>
+                  <label>Description<input name="activity_description[]" placeholder="Nettoyage, entraînement…" disabled></label>
                   <label>Heures<input type="number" inputmode="decimal" name="activity_hours[]" step="0.01" min="0" value="1" disabled></label>
                   <label>Tarif (CHF)<input type="number" inputmode="decimal" name="activity_rate[]" step="0.01" min="0" value="50" disabled></label>
                   <label class="charge-toggle"><input type="checkbox" class="charge-toggle-input" checked disabled><input type="hidden" name="activity_subject_to_charges[]" value="1" disabled><span>Soumis aux charges</span></label>

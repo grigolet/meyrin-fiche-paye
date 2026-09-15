@@ -146,7 +146,7 @@ def salary_pdf(form) -> tuple[bytes, str]:
     st = styles()
     trainer = form.get("trainer_name", "").strip()
     if not trainer:
-        raise ValueError("Le nom de l'entraîneur est obligatoire.")
+        raise ValueError("Le nom du collaborateur ou de la collaboratrice est obligatoire.")
 
     remuneration_mode = form.get("remuneration_mode", "global")
     gross_lines = []
@@ -171,7 +171,7 @@ def salary_pdf(form) -> tuple[bytes, str]:
         hourly_rate = dec(form.get("hourly_rate"))
         amount = hours * hourly_rate
         subject_to_charges = checkbox_enabled(form, "global_subject_to_charges")
-        label = form.get("global_description", "Heures d'entraînement").strip() or "Heures d'entraînement"
+        label = form.get("global_description", "Heures de travail").strip() or "Heures de travail"
         gross_lines.append((label if subject_to_charges else f"{label} (sans charges)", hours, "heure", hourly_rate, amount))
         if subject_to_charges:
             contribution_base += amount
@@ -226,8 +226,8 @@ def salary_pdf(form) -> tuple[bytes, str]:
 
     employee = Table(
         [
-            [p("EMPLOYEUR", st["label"]), p("ENTRAÎNEUR", st["label"])],
-            [p(f"{CLUB_NAME}\n{CLUB_ADDRESS}\nFonction: {form.get('role', 'Moniteur de tennis de table')}", st["body"]),
+            [p("EMPLOYEUR", st["label"]), p("COLLABORATEUR/TRICE", st["label"])],
+            [p(f"{CLUB_NAME}\n{CLUB_ADDRESS}\nFonction: {form.get('role', '')}", st["body"]),
              p(f"<b>{trainer}</b>\n{form.get('trainer_address', '')}\nN° AVS: {form.get('avs_number', '')}\nDate de naissance: {display_date(form.get('birth_date', ''))}", st["body"])],
         ],
         colWidths=[89 * mm, 89 * mm],
