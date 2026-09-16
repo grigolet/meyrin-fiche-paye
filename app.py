@@ -319,18 +319,8 @@ def salary_pdf(form) -> tuple[bytes, str]:
         ("TOPPADDING", (0, 1), (-1, 1), 2.5 * mm),
         ("BOTTOMPADDING", (0, 1), (-1, 1), 2.5 * mm),
     ]))
-    signatures = Table(
-        [[p("Date", st["label"]), p("Fonction", st["label"]), p("Signature", st["label"])], ["", "", ""]],
-        colWidths=[59.3 * mm] * 3,
-        rowHeights=[7 * mm, 14 * mm],
-    )
-    signatures.setStyle(TableStyle([
-        ("BOX", (0, 0), (-1, -1), 0.6, LIGHT_LINE),
-        ("INNERGRID", (0, 0), (-1, -1), 0.4, LIGHT_LINE),
-        ("ALIGN", (0, 0), (-1, 0), "CENTER"),
-        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-    ]))
-    story += [KeepTogether([summary, Spacer(1, 3 * mm), signatures])]
+    generation_date = p(f"Date d'émission: <b>{date.today().strftime('%d.%m.%Y')}</b>", st["right"])
+    story += [KeepTogether([summary, Spacer(1, 3 * mm), generation_date])]
     doc.build(story, onFirstPage=footer, onLaterPages=footer)
     filename = f"Bulletin-paye-{filename_part(trainer)}-{form.get('period_end', date.today().isoformat())}.pdf"
     return buffer.getvalue(), filename

@@ -1,3 +1,4 @@
+from datetime import date
 from io import BytesIO
 
 from pypdf import PdfReader
@@ -48,6 +49,8 @@ def test_salary_slip_matches_reference_calculation():
     assert "42.57 CHF" in text
     assert "622.43 CHF" in text
     assert "COLLABORATEUR/TRICE" in text
+    assert f"Date d'émission: {date.today().strftime('%d.%m.%Y')}" in text
+    assert "Signature" not in text
 
 
 def test_salary_deductions_use_cents_and_exclude_exempt_pay():
