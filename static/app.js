@@ -110,19 +110,21 @@ function setRemunerationMode() {
 
 function updateSalary() {
   let contributionBase = 0;
+  let grossRemuneration = 0;
   if (selectedRemunerationMode() === "detailed") {
     salaryLines.querySelectorAll(".salary-line").forEach((line) => {
+      const amount = number(line.querySelector('[name="activity_hours[]"]').value)
+        * number(line.querySelector('[name="activity_rate[]"]').value);
+      grossRemuneration += amount;
       if (line.querySelector(".charge-toggle-input").checked) {
-        contributionBase += number(line.querySelector('[name="activity_hours[]"]').value)
-          * number(line.querySelector('[name="activity_rate[]"]').value);
+        contributionBase += amount;
       }
     });
   } else {
-    contributionBase = salaryForm.querySelector('[data-remuneration-panel="global"] .charge-toggle-input').checked
-      ? number(salaryForm.hours.value) * number(salaryForm.hourly_rate.value)
-      : 0;
+    grossRemuneration = number(salaryForm.hours.value) * number(salaryForm.hourly_rate.value);
+    contributionBase = salaryForm.querySelector('[data-remuneration-panel="global"] .charge-toggle-input').checked ? grossRemuneration : 0;
   }
-  const gross = contributionBase + number(salaryForm.tax_exempt_amount.value);
+  const gross = grossRemuneration + number(salaryForm.tax_exempt_amount.value);
   const rates = ["avs_rate", "unemployment_rate", "accident_rate", "lpp_rate", "withholding_rate", "extra_deduction_rate"];
   const deductionsEnabled = salaryForm.querySelector('[name="deductions_enabled"][type="checkbox"]').checked;
   const deductions = deductionsEnabled

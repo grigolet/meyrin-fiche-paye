@@ -153,6 +153,7 @@ def salary_pdf(form) -> tuple[bytes, str]:
     contribution_base = Decimal("0")
     if remuneration_mode == "detailed":
         descriptions = form.getlist("activity_description[]")
+        activity_dates = form.getlist("activity_date[]")
         quantities = form.getlist("activity_hours[]")
         rates = form.getlist("activity_rate[]")
         charge_flags = form.getlist("activity_subject_to_charges[]")
@@ -163,6 +164,9 @@ def salary_pdf(form) -> tuple[bytes, str]:
                 amount = hours * hourly_rate
                 subject_to_charges = index >= len(charge_flags) or charge_flags[index].lower() not in {"0", "false", "off", "no"}
                 label = description.strip() or "Activité"
+                activity_date = display_date(activity_dates[index]) if index < len(activity_dates) else ""
+                if activity_date:
+                    label = f"{activity_date} - {label}"
                 gross_lines.append((label if subject_to_charges else f"{label} (sans charges)", hours, "heure", hourly_rate, amount))
                 if subject_to_charges:
                     contribution_base += amount
@@ -201,6 +205,7 @@ def salary_pdf(form) -> tuple[bytes, str]:
         deductions.append((label, rate, amount))
     total_deductions = sum((row[2] for row in deductions), Decimal("0"))
     net = gross - total_deductions
+    notes = form.get("notes", "").strip()
 
     period_start = display_date(form.get("period_start", ""))
     period_end = display_date(form.get("period_end", ""))
@@ -282,7 +287,20 @@ def salary_pdf(form) -> tuple[bytes, str]:
         ("LEFTPADDING", (0, 0), (-1, -1), 2.3 * mm),
         ("RIGHTPADDING", (0, 0), (-1, -1), 2.3 * mm),
     ]))
-    story += [ded, Spacer(1, 5 * mm)]
+    story += [ded, Spacer(1, 4 * mm)]
+    if notes:
+        note_box = Table([[p(notes, st["body"])]], colWidths=[178 * mm])
+        note_box.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, -1), PALE_BLUE),
+            ("BOX", (0, 0), (-1, -1), 0.5, LIGHT_LINE),
+            ("LEFTPADDING", (0, 0), (-1, -1), 3 * mm),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 3 * mm),
+            ("TOPPADDING", (0, 0), (-1, -1), 1.8 * mm),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 1.8 * mm),
+        ]))
+        story += [p("NOTES", st["section"]), Spacer(1, 1 * mm), note_box, Spacer(1, 2.5 * mm)]
+    else:
+        story += [Spacer(1, 1 * mm)]
 
     summary = Table(
         [
@@ -298,13 +316,13 @@ def salary_pdf(form) -> tuple[bytes, str]:
         ("ALIGN", (0, 0), (-1, -1), "CENTER"),
         ("TOPPADDING", (0, 0), (-1, 0), 2.2 * mm),
         ("BOTTOMPADDING", (0, 0), (-1, 0), 2.2 * mm),
-        ("TOPPADDING", (0, 1), (-1, 1), 4 * mm),
-        ("BOTTOMPADDING", (0, 1), (-1, 1), 4 * mm),
+        ("TOPPADDING", (0, 1), (-1, 1), 2.5 * mm),
+        ("BOTTOMPADDING", (0, 1), (-1, 1), 2.5 * mm),
     ]))
     signatures = Table(
         [[p("Date", st["label"]), p("Fonction", st["label"]), p("Signature", st["label"])], ["", "", ""]],
         colWidths=[59.3 * mm] * 3,
-        rowHeights=[8 * mm, 18 * mm],
+        rowHeights=[7 * mm, 14 * mm],
     )
     signatures.setStyle(TableStyle([
         ("BOX", (0, 0), (-1, -1), 0.6, LIGHT_LINE),
@@ -312,7 +330,7 @@ def salary_pdf(form) -> tuple[bytes, str]:
         ("ALIGN", (0, 0), (-1, 0), "CENTER"),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
     ]))
-    story += [KeepTogether([summary, Spacer(1, 5 * mm), signatures])]
+    story += [KeepTogether([summary, Spacer(1, 3 * mm), signatures])]
     doc.build(story, onFirstPage=footer, onLaterPages=footer)
     filename = f"Bulletin-paye-{filename_part(trainer)}-{form.get('period_end', date.today().isoformat())}.pdf"
     return buffer.getvalue(), filename

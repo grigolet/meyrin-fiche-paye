@@ -94,6 +94,7 @@ def test_salary_detailed_activities_and_disabled_deductions():
             "period_end": "30.09.2026",
             "remuneration_mode": "detailed",
             "activity_description[]": ["Entraînement enfants", "Formation adultes"],
+            "activity_date[]": ["03.09.2026", "17.09.2026"],
             "activity_hours[]": ["4.5", "3"],
             "activity_rate[]": ["50", "60"],
             "activity_subject_to_charges[]": ["1", "1"],
@@ -101,13 +102,17 @@ def test_salary_detailed_activities_and_disabled_deductions():
             "deductions_enabled": "0",
             "avs_rate": "5.3",
             "unemployment_rate": "1.1",
+            "notes": "Paiement des activités du mois.\nMerci pour votre engagement.",
         },
     )
     assert response.status_code == 200
     text = "\n".join(page.extract_text() or "" for page in PdfReader(BytesIO(response.data)).pages)
     assert "Période du 01.09.2026 au 30.09.2026" in text
-    assert "Entraînement enfants" in text
-    assert "Formation adultes" in text
+    assert "03.09.2026 - Entraînement enfants" in text
+    assert "17.09.2026 - Formation adultes" in text
+    assert "NOTES" in text
+    assert "Paiement des activités du mois." in text
+    assert "Merci pour votre engagement." in text
     assert "405.00 CHF" in text
     assert "0.00 CHF" in text
 
@@ -122,6 +127,7 @@ def test_salary_can_mix_hourly_work_with_and_without_charges():
             "period_end": "30.09.2026",
             "remuneration_mode": "detailed",
             "activity_description[]": ["Entraînement enfants", "Formation"],
+            "activity_date[]": ["05.09.2026", "2026-09-12"],
             "activity_hours[]": ["5", "2"],
             "activity_rate[]": ["50", "75"],
             "activity_subject_to_charges[]": ["1", "0"],
@@ -133,7 +139,7 @@ def test_salary_can_mix_hourly_work_with_and_without_charges():
     )
     assert response.status_code == 200
     text = "\n".join(page.extract_text() or "" for page in PdfReader(BytesIO(response.data)).pages)
-    assert "Formation (sans charges)" in text
+    assert "12.09.2026 - Formation (sans charges)" in text
     assert "400.00 CHF" in text
     assert "250.00 CHF" in text
     assert "13.25 CHF" in text
